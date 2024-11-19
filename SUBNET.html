@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subnet Calculator</title>
+  <style>
+    /* General Body and Canvas Setup */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Courier New', Courier, monospace;
+      overflow: hidden;
+      background-color: black;
+      color: #00ff00;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .menu, .calculator {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      z-index: 10;
+      color: #00ff00;
+    }
+
+    .menu h1 {
+      font-size: 3rem;
+      transition: opacity 1s ease;
+    }
+
+    .menu button {
+      font-size: 1.5rem;
+      padding: 10px 20px;
+      background: #00ff00;
+      color: black;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 15px #00ff00;
+    }
+
+    .menu button:hover {
+      background: #004400;
+    }
+
+    .calculator {
+      display: none;
+      font-size: 1.2rem;
+    }
+
+    .calculator input {
+      padding: 10px;
+      margin: 10px;
+      border: 2px solid #00ff00;
+      background: black;
+      color: #00ff00;
+    }
+
+    .calculator button {
+      font-size: 1.2rem;
+      padding: 10px 20px;
+      background: #00ff00;
+      color: black;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Matrix effect */
+    #matrixCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Diffuse effect for the text */
+    @keyframes diffuseEffect {
+      0% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(3);
+      }
+    }
+
+    /* Apply animation to the menu text */
+    .diffuse {
+      animation: diffuseEffect 2s forwards;
+    }
+
+    .subnet-output {
+      font-size: 1.5rem;
+      margin-top: 20px;
+      color: #00ff00;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Matrix Background Canvas -->
+  <canvas id="matrixCanvas"></canvas>
+
+  <!-- Menu with Start Button -->
+  <div class="menu">
+    <h1 id="welcomeText">Welcome to the Subnet Calculator</h1>
+    <button id="startButton">Start</button>
+  </div>
+
+  <!-- Subnet Calculator Form -->
+  <div class="calculator">
+    <h1>Subnet Calculator</h1>
+    <input type="text" id="ipAddress" placeholder="Enter IP Address (e.g., 192.168.1.1)">
+    <input type="text" id="subnetMask" placeholder="Enter Subnet Mask (e.g., 255.255.255.0)">
+    <button onclick="calculateSubnet()">Calculate</button>
+    <div class="subnet-output" id="subnetResult"></div>
+  </div>
+
+  <script>
+    // Matrix animation logic
+    const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const matrixChars = "01";
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+
+    const drops = Array.from({ length: columns }, () => 1);
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#00ff00";
+      ctx.font = fontSize + "px monospace";
+
+      drops.forEach((y, index) => {
+        const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+        const x = index * fontSize;
+
+        ctx.fillText(text, x, y * fontSize);
+
+        if (y * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[index] = 0;
+        }
+
+        drops[index]++;
+      });
+    }
+
+    setInterval(drawMatrix, 50);
+
+    // Start Button Animation to Diffuse the Matrix Text
+    document.getElementById("startButton").addEventListener("click", () => {
+      // Trigger text diffusion animation
+      document.getElementById("welcomeText").classList.add("diffuse");
+      
+      // Transition to the subnet calculator after animation
+      setTimeout(() => {
+        document.querySelector(".menu").style.display = "none";
+        document.querySelector(".calculator").style.display = "block";
+      }, 2000); // Duration of diffusion animation
+    });
+
+    // Subnet Calculator Function
+    function calculateSubnet() {
+      const ipAddress = document.getElementById("ipAddress").value;
+      const subnetMask = document.getElementById("subnetMask").value;
+
+      if (!ipAddress || !subnetMask) {
+        document.getElementById("subnetResult").innerText = "Please enter both IP Address and Subnet Mask.";
+        return;
+      }
+
+      // Example subnet calculation (You can expand with actual calculation logic)
+      const subnet = ipAddress.split('.').map((octet, index) => {
+        const mask = subnetMask.split('.')[index];
+        return (parseInt(octet) & parseInt(mask)).toString();
+      }).join('.');
+
+      document.getElementById("subnetResult").innerText = `Subnet: ${subnet}`;
+    }
+  </script>
+</body>
+</html>
